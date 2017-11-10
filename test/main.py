@@ -15,13 +15,20 @@ app = Flask(__name__)
 http://127.0.0.1:5000/?roast=30,20&subset=10,17,12,7,4
 '''
     
+class Subset(object):
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+    
+            
+            
 class Roast(object):
      
     def __init__(self, name, initialValue, remainingValue):
             self.name = name
             self.initialValue = initialValue    
             self.remainingValue = remainingValue
-            self.subset = list()
+            self.subset = {}
      
     def getName(self):
         return self.name 
@@ -33,8 +40,13 @@ class Roast(object):
         return self.remainingValue 
     
     def addToSubset(self, v):
-        return self.subset.append(v) 
+        
+        if self.subset.has_key(v.name):
+                self.subset[v.name] += v.value
+        else:
+            self.subset[v.name] = v.value
 
+  
 def process(roast, subset, result):
     
     roastResult = roast
@@ -67,8 +79,12 @@ def bbc():
         
     subset = request.args.get('subset')
     subsetList =  [int(x) for x in subset.split(",")]
-    subsetList.sort(reverse=True)
-    print subsetList
+#     subsetList.sort(reverse=True)
+#     print subsetList
+    
+    subsetObjList = []
+    for i,x in enumerate(subsetList):
+        subsetObjList.append(Subset('SUBSET '+str(i+1), x))
     
     roastingLeft = sum(roast.remainingValue for roast in roastObjList)
 
@@ -88,10 +104,10 @@ def bbc():
 #             result[roastTemp] = list()
         
             newList = []
-            for s in subsetList:
-                if(roast.remainingValue >= s):
-                    roast.remainingValue-=s
-                    roastingLeft-=s
+            for s in subsetObjList:
+                if(roast.remainingValue >= s.value):
+                    roast.remainingValue-=s.value
+                    roastingLeft-=s.value
                     roast.addToSubset(s)
                     newList.append(s)
                     if roast.remainingValue == 0:
@@ -99,14 +115,13 @@ def bbc():
                 else:
                     break
             
-            subsetList = [x for x in subsetList if x not in newList]
+            subsetObjList = [x for x in subsetObjList if x not in newList]
     
         if(roastingLeft!=0):
             # Create 1 lb bag
-            newSubsetValue = subsetList[0]-1
-            subsetList[0] = newSubsetValue;
-            subsetList.append(1)
-            subsetList.sort(reverse=True)
+            subsetObjList[0].value-=1
+            subsetObjList.append(Subset(subsetObjList[0].name, 1))
+            subsetObjList.sort(key=lambda subsetObjList: subsetObjList.value, reverse=True)
 
 #     print 'new sublist'+str(subsetList)
 #     print 'roast'+str(roastList)    
@@ -116,6 +131,8 @@ def bbc():
     
     jsonResult = list()
     for roast in roastObjList:
+        
+
         jsonResult.append({'RoastName':roast.name,
                    'RoastCapacity':roast.initialValue,
                    'Subset':roast.subset})
