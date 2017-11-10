@@ -39,7 +39,7 @@ class Roast(object):
     
     def addToSubset(self, v):
         
-        if self.subset.has_key(v.name):
+        if v.name not in self.subset:
                 self.subset[v.name] += v.value
         else:
             self.subset[v.name] = v.value
