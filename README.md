@@ -2,18 +2,21 @@
 
 ## Overview
 This is the sample code that take roast and subset and give the result
+=======
 
-##API
+## API
 
-###Request Type : GET
-###URL: http://<IP_ADDRESS>/?roast=2,2,2&subset=4,2
+### Request Type : GET
+### URL: https://bbc-flask-app.herokuapp.com/?roast=2,2,2&subset=4,2
 
-###Query Parameters:
-roast: Comma Seperated whole numbers of 
+### Query Parameters:
+
+roast: Comma Seperated whole numbers value of roast
+
 subset: Comma seperate subsets
 
 
-###Sample Response:
+### Sample Response:
 	[
 	{
 	"Subset": {
