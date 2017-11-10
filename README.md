@@ -2,18 +2,19 @@
 
 ## Overview
 
+## API
 
-##API
+### Request Type : GET
+### URL: http://<IP_ADDRESS>/?roast=2,2,2&subset=4,2
 
-###Request Type : GET
-###URL: http://<IP_ADDRESS>/?roast=2,2,2&subset=4,2
+### Query Parameters:
 
-###Query Parameters:
-roast: Comma Seperated whole numbers of 
+roast: Comma Seperated whole numbers value of roast
+
 subset: Comma seperate subsets
 
 
-###Sample Response:
+### Sample Response:
 	[
 	{
 	"Subset": {
