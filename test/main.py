@@ -19,9 +19,7 @@ class Subset(object):
     def __init__(self, name, value):
         self.name = name
         self.value = value
-    
-            
-            
+          
 class Roast(object):
      
     def __init__(self, name, initialValue, remainingValue):
@@ -46,24 +44,6 @@ class Roast(object):
         else:
             self.subset[v.name] = v.value
 
-  
-def process(roast, subset, result):
-    
-    roastResult = roast
-    result[roastResult] = list()
-
-    newlist = []
-    for s in subset:
-        if(roast >= s):
-            roast-=s
-            result[roastResult].append(s)
-            if roast == 0:
-                break
-        else:
-            newlist.append(s)
- 
-    subset = newlist
-    return
             
 @app.route('/')
 def bbc():
@@ -73,41 +53,35 @@ def bbc():
     roastObjList = []
     for i,x in enumerate(roastList):
         roastObjList.append(Roast('ROAST '+str(i+1), x, x))
-#     roastObjList.sort(key=lambda roastObjList: roastObjList.initialValue, reverse=True)
-
-    print roastList
         
     subset = request.args.get('subset')
     subsetList =  [int(x) for x in subset.split(",")]
-#     subsetList.sort(reverse=True)
-#     print subsetList
     
     subsetObjList = []
     for i,x in enumerate(subsetList):
         subsetObjList.append(Subset('SUBSET '+str(i+1), x))
-    
-    roastingLeft = sum(roast.remainingValue for roast in roastObjList)
-
-
-    if(roastingLeft != sum(subsetList)):
-        return jsonify(result='INPUT ERROR')    
-    
-#     while(totalRoasted!=0):
-      
-    while(roastingLeft!=0):
         
+    # sort decending
+    subsetObjList.sort(key=lambda subsetObjList: subsetObjList.value, reverse=True)
+
+    
+    roastingTotal = sum(roastList)
+    subsetListTotal = sum(subsetList)
+    if(roastingTotal != subsetListTotal):
+        return jsonify(result='Total Mismatch, Ensure that the roast total is matching subset total roast='+str(roastingTotal)+' subset='+str(subsetListTotal))    
+          
+    while(roastingTotal!=0):
+        
+        # sort roast in decending
         roastObjList.sort(key=lambda roastObjList: roastObjList.remainingValue, reverse=True)
 
         for i, roast in enumerate(roastObjList):
-            
-#             roastTemp = roast.getInitValue()
-#             result[roastTemp] = list()
-        
             newList = []
+            # so
             for s in subsetObjList:
                 if(roast.remainingValue >= s.value):
                     roast.remainingValue-=s.value
-                    roastingLeft-=s.value
+                    roastingTotal-=s.value
                     roast.addToSubset(s)
                     newList.append(s)
                     if roast.remainingValue == 0:
@@ -115,24 +89,17 @@ def bbc():
                 else:
                     break
             
+            # Update subset removing the processed one
             subsetObjList = [x for x in subsetObjList if x not in newList]
     
-        if(roastingLeft!=0):
-            # Create 1 lb bag
+        if(roastingTotal!=0):
+            # Deduct 1 lb from bag and try to find again, try with minimum bags each
             subsetObjList[0].value-=1
             subsetObjList.append(Subset(subsetObjList[0].name, 1))
             subsetObjList.sort(key=lambda subsetObjList: subsetObjList.value, reverse=True)
-
-#     print 'new sublist'+str(subsetList)
-#     print 'roast'+str(roastList)    
-#     print 'totalRoasted'+str(roastingLeft)
-    
-#         process(roast, subsetList, result)
     
     jsonResult = list()
     for roast in roastObjList:
-        
-
         jsonResult.append({'RoastName':roast.name,
                    'RoastCapacity':roast.initialValue,
                    'Subset':roast.subset})
